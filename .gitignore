@@ -1,0 +1,10 @@
+.idea/
+.vscode
+**/debug
+**/debug.test
+*.log
+*.html
+*.out
+*.dll
+*.exe
+go.sum
