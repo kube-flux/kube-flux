@@ -39,4 +39,3 @@ jobs:
     # Run automated tests 
     - name: Test
       run: go test -v .
-      
