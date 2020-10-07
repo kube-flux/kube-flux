@@ -7,7 +7,6 @@
 *.out
 *.dll
 *.exe
-go.sum
 *.pem
 *.json
 *.terraform
