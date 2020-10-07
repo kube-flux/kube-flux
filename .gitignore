@@ -8,3 +8,8 @@
 *.dll
 *.exe
 go.sum
+*.pem
+*.json
+*.terraform
+terraform.tfstate
+terraform.tfstate.backup

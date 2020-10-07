@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: demo
+  namespace: default
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      run: demo
+  template:
+    metadata:
+      labels:
+        run: demo
+    spec:
+      containers:
+        - image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          name: demo
+          ports:
+            - containerPort: 80
+              protocol: TCP
