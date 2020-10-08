@@ -9,4 +9,10 @@ func TestNewPolicyHandler(t *testing.T) {
 	if handler == nil {
 		t.Fatalf("Error %v", err)
 	}
+
+	// TODO: Use hooks to test
 }
+
+// TODO(lacee): Test if GET request will function as expected
+
+// TODO: Test if POST & DELETE requests will fail

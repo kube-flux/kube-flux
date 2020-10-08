@@ -68,8 +68,8 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	// No supports for POST & DELETE
 	if r.Method == "POST" || r.Method == "DELETE" {
-		log.Println("func", "ServeHTTP", "No support for POST & DELETE")
-		if _, err := fmt.Fprintf(w, "No support for POST & DELETE"); err != nil {
+		log.Println("func", "ServeHTTP", "No supports yet for POST & DELETE")
+		if _, err := fmt.Fprintf(w, "No supports yet for POST & DELETE"); err != nil {
 			log.Println("func", "ServeHTTP", "Failed to write to writer", "err:", err)
 		}
 	} else if r.Method == "GET" {
