@@ -73,6 +73,7 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			log.Println("func", "ServeHTTP", "Failed to write to writer", "err:", err)
 		}
 	} else if r.Method == "GET" {
+		// Get the values from database and write them to response
 		handler.db.View(func(tx *bolt.Tx) error {
 			bucket := tx.Bucket([]byte(policyBucket))
 			if bucket == nil {
