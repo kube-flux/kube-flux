@@ -20,15 +20,10 @@ type Policy struct {
 
 // PolicyTracker defines the API interface of the PolicyReceiver(Zeus)
 type PolicyTracker interface {
-	// CreatePolicy creates a new policy with default Green status
-	CreatePolicy() (Policy, error)
-
-	// UpdatePolicy updates the policy with given status
-	UpdatePolicy(status uint8) (Policy, error)
 
 	// GetPolicy gets the policy
 	GetPolicy() (Policy, error)
 
-	// DeletePolicy deletes the policy
-	DeletePolicy() error
+	// UpdatePolicy updates the policy with given status
+	UpdatePolicy(status uint8) (Policy, error)
 }
