@@ -1,21 +1,19 @@
 package policy
 
-import "time"
-
 // Status represents Policy energy consumption status: Green, Brown, Black
-type Status int
+type Status string
 
 const (
-	Green = iota
-	Brown
-	Black
+	Green = "Green"
+	Brown = "Brown"
+	Black = "Black"
 )
 
 // Policy defines the object that maintains energy related status
 type Policy struct {
 	Status    Status
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt string
+	UpdatedAt string
 }
 
 // PolicyTracker defines the API interface of the PolicyReceiver(Zeus)

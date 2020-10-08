@@ -1,6 +1,8 @@
 package policy
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +14,7 @@ import (
 const (
 	policyDB      = "policy.db"
 	policyBucket  = "policyBucket"
-	defaultPolicy = "Black"
+	defaultPolicy = Black
 )
 
 type policyHandler struct {
@@ -41,11 +43,12 @@ func NewPolicyHandler() (*policyHandler, error) {
 			log.Println("func", "NewPolicyHandler", "Failed to put default status", "err:", err)
 			return err
 		}
-		if err = bucket.Put([]byte("CreatedAt"), []byte(defaultPolicy)); err != nil {
+		now := time.Now()
+		if err = bucket.Put([]byte("CreatedAt"), []byte(now.String())); err != nil {
 			log.Println("func", "NewPolicyHandler", "Failed to put default CreatedAt", "err:", err)
 			return err
 		}
-		if err = bucket.Put([]byte("UpdatedAt"), []byte(defaultPolicy)); err != nil {
+		if err = bucket.Put([]byte("UpdatedAt"), []byte(now.String())); err != nil {
 			log.Println("func", "NewPolicyHandler", "Failed to put default UpdatedAt", "err:", err)
 			return err
 		}
@@ -68,15 +71,31 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		log.Println("func", "ServeHTTP", "No support for POST & DELETE")
 		if _, err := fmt.Fprintf(w, "No support for POST & DELETE"); err != nil {
 			log.Println("func", "ServeHTTP", "Failed to write to writer", "err:", err)
-			return
 		}
-	}
+	} else if r.Method == "GET" {
+		handler.db.View(func(tx *bolt.Tx) error {
+			bucket := tx.Bucket([]byte(policyBucket))
+			if bucket == nil {
+				err := errors.New("policy bucket doesn't exist")
+				log.Println("func", "ServeHTTP", "Failed to write response to writer", "err:", err)
+				return err
+			}
 
-	if r.Method == "GET" {
-		fmt.Fprintf(w, "Hello GET")
-	}
+			policy := Policy{
+				Status:    Status(bucket.Get([]byte("Status"))),
+				CreatedAt: string(bucket.Get([]byte("CreatedAt"))),
+				UpdatedAt: string(bucket.Get([]byte("UpdatedAt"))),
+			}
 
-	if r.Method == "PUT" {
+			w.Header().Set("Content-Type", "application/json")
+			if err := json.NewEncoder(w).Encode(policy); err != nil {
+				log.Println("func", "ServeHTTP", "Failed to write policy to writer", "err:", err)
+				return err
+			}
+			log.Println("func", "ServeHTTP", "Response written")
+			return nil
+		})
+	} else if r.Method == "PUT" {
 		fmt.Fprintf(w, "Hello GET")
 	}
 }
