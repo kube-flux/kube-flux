@@ -1,2 +1,3 @@
 zeus:
+	go fmt github.com/USF-VMware-EnergyAwareDatacenter-2020/kube-flux/...
 	go build -o ./build/zeus ./main/main.go
