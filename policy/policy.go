@@ -4,15 +4,14 @@ package policy
 type Status string
 
 const (
-	Green = "Green"
-	Brown = "Brown"
-	Black = "Black"
+	Green Status = "Green"
+	Brown Status = "Brown"
+	Black Status = "Black"
 )
 
 // Policy defines the object that maintains energy related status
 type Policy struct {
 	Status    Status
-	CreatedAt string
 	UpdatedAt string
 }
 
