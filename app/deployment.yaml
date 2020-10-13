@@ -1,22 +1,26 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo
+  name: ngnix-deployment
   namespace: default
+  labels:
+    app: ngnix
 spec:
   replicas: 4
   selector:
     matchLabels:
-      run: demo
+      app: ngnix
   template:
     metadata:
+      annotations:
+        imp: "3"
       labels:
-        run: demo
+        app: ngnix
     spec:
       containers:
         - image: nginx:latest
           imagePullPolicy: IfNotPresent
-          name: demo
+          name: ngnix
           ports:
             - containerPort: 80
               protocol: TCP
