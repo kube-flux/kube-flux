@@ -15,10 +15,12 @@ const server = http.createServer((req, res) => {
             res.end()
         })
     }
- })
+})
 
 server.on('connection', (socket) => {
     console.log('New Connection...')
+    const ip = socket.remoteAddress;
+    console.log('Your IP address is' + ip)
 })
 
 server.listen(port, (error) => {
