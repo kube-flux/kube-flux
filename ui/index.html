@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Document</title>
+    <title>kube-flux policy UI</title>
 </head>
 <body>
-  <h1>Welcome to the Hello World</h1>
-    <button type="button" class="btn btn-success" onclick="my_button_click_handler">Green</button>
+  <h1>Set Kubernetes Cluster Energy Policy</h1><br>
+  <h4>Please choose a signal from blow</h4><br>
+    <button type="button" id="Green" class="btn btn-success" onclick="myFunction(id)">Green</button>
+    <button type="button" id="Brown" class="btn btn-warning" onclick="myFunction(id)" >Brown</button>
+    <button type="button" id="Black" class="btn btn-info" onclick="myFunction(id)">Black</button>
     <script>
-        function my_button_click_handler()
-        {
-        alert('Button Clcked');
+      async function myFunction(id) {
+        document.getElementById("message").innerHTML = "Button clicked!"
+        const data = {'Status': id}
+        const options = {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
         }
-        </script>
-    <button type="button" class="btn btn-warning">Brown</button>
-    <button type="button" class="btn btn-info">Black</button>
+        const response = await fetch('http://localhost:9999/', options)
+        console.log(response)  
+      }
+    </script>
   <br><br>
-  <p>Please choose a signal from above</p>
+  <p id="message"></p>
 </body>
 </html>
