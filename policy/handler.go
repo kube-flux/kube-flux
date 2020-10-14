@@ -3,7 +3,6 @@ package policy
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -61,14 +60,17 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	log.Println("func", "ServeHTTP", "Start handling policy request")
 	defer log.Println("func", "ServeHTTP", "Finished handling policy request")
 
-	// No supports for POST & DELETE
-	if r.Method == "POST" || r.Method == "DELETE" {
-		log.Println("func", "ServeHTTP", "No supports yet for POST & DELETE")
-		if _, err := fmt.Fprintf(w, "No supports yet for POST & DELETE"); err != nil {
-			log.Println("func", "ServeHTTP", "Failed to write to writer", "err:", err)
-		}
-	} else if r.Method == "GET" {
-		log.Println("func", "ServeHTTP", "It's a GET request")
+	// Setup response
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS, PUT")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	if r.Method == "OPTIONS" {
+		return
+	}
+
+	if r.Method == "GET" {
+		log.Println("func", "ServeHTTP", "Handling GET request")
 		err := handler.db.View(func(tx *bolt.Tx) error {
 			bucket := tx.Bucket([]byte(policyBucket))
 			if bucket == nil {
@@ -93,7 +95,10 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-	} else if r.Method == "PUT" {
+		return
+	}
+
+	if r.Method == "PUT" {
 		log.Println("func", "ServeHTTP", "It's a PUT request")
 		err := handler.db.Update(func(tx *bolt.Tx) error {
 			// Get bucket
@@ -133,5 +138,6 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+		return
 	}
 }
