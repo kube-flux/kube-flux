@@ -13,9 +13,18 @@ import (
 const (
 	policyDB      = "policy.db"
 	policyBucket  = "policyBucket"
-	defaultPolicy = Green
 	dbOpenTimeout = 1 * time.Second
 )
+
+func getDefaultPolicyByteArray() []byte {
+	defaultPolicy := &Policy{
+		Status:    Green,
+		UpdatedAt: time.Now().String(),
+	}
+
+	policyByteArray, _ := json.Marshal(defaultPolicy)
+	return policyByteArray
+}
 
 type policyHandler struct {
 	db *bolt.DB
@@ -37,17 +46,13 @@ func NewPolicyHandler() (*policyHandler, error) {
 			log.Println("func", "NewPolicyHandler", "Failed to create bucket", "err:", err)
 			return err
 		}
-		log.Println("func", "NewPolicyHandler", "Created bucket")
 
-		if err = bucket.Put([]byte("Status"), []byte(defaultPolicy)); err != nil {
+		if err = bucket.Put([]byte("Policy"), getDefaultPolicyByteArray()); err != nil {
 			log.Println("func", "NewPolicyHandler", "Failed to put default status", "err:", err)
 			return err
 		}
-		if err = bucket.Put([]byte("UpdatedAt"), []byte(time.Now().String())); err != nil {
-			log.Println("func", "NewPolicyHandler", "Failed to put default UpdatedAt", "err:", err)
-			return err
-		}
-		log.Println("func", "NewPolicyHandler", "Added default parameters")
+
+		log.Println("func", "NewPolicyHandler", "Added default Policy")
 		return nil
 	})
 	if err != nil {
@@ -79,9 +84,10 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 				return err
 			}
 
-			policy := Policy{
-				Status:    Status(bucket.Get([]byte("Status"))),
-				UpdatedAt: string(bucket.Get([]byte("UpdatedAt"))),
+			var policy Policy
+			if err := json.Unmarshal(bucket.Get([]byte("Policy")), &policy); err != nil {
+				log.Println("func", "ServeHTTP", "err:", err)
+				return err
 			}
 
 			w.Header().Set("Content-Type", "application/json")
@@ -99,7 +105,7 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if r.Method == "PUT" {
-		log.Println("func", "ServeHTTP", "It's a PUT request")
+		log.Println("func", "ServeHTTP", "Handling PUT request")
 		err := handler.db.Update(func(tx *bolt.Tx) error {
 			// Get bucket
 			log.Println("func", "NewPolicyHandler", "Getting bucket")
@@ -115,19 +121,21 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			decoder := json.NewDecoder(r.Body)
 			var policy Policy
 			if err := decoder.Decode(&policy); err != nil {
-				err := errors.New("Failed to decode request to Policy")
+				err := errors.New("failed to decode to Policy")
 				log.Println("func", "ServeHTTP", "err:", err)
 				return err
 			}
+			policy.UpdatedAt = time.Now().String()
 
 			// Update Status
-			log.Println("func", "NewPolicyHandler", "Updating Policy")
-			if err := bucket.Put([]byte("Status"), []byte(policy.Status)); err != nil {
-				log.Println("func", "NewPolicyHandler", "Failed to put status", "err:", err)
+			policyByteArray, err := json.Marshal(policy)
+			if err != nil {
+				log.Println("func", "NewPolicyHandler", "Failed to encode policy struct", "err:", err)
 				return err
 			}
-			if err := bucket.Put([]byte("UpdatedAt"), []byte(time.Now().String())); err != nil {
-				log.Println("func", "NewPolicyHandler", "Failed to put UpdatedAt", "err:", err)
+			log.Println("func", "NewPolicyHandler", "Updating Policy")
+			if err := bucket.Put([]byte("Policy"), policyByteArray); err != nil {
+				log.Println("func", "NewPolicyHandler", "Failed to put Policy", "err:", err)
 				return err
 			}
 
