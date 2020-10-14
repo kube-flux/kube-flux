@@ -7,3 +7,8 @@
 *.out
 *.dll
 *.exe
+*.pem
+*.json
+*.terraform
+terraform.tfstate
+terraform.tfstate.backup
