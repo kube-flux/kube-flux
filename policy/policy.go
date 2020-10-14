@@ -14,13 +14,3 @@ type Policy struct {
 	Status    Status
 	UpdatedAt string
 }
-
-// PolicyTracker defines the API interface of the PolicyReceiver(Zeus)
-type PolicyTracker interface {
-
-	// GetPolicy gets the policy
-	GetPolicy() (Policy, error)
-
-	// UpdatePolicy updates the policy with given status
-	UpdatePolicy(status uint8) (Policy, error)
-}

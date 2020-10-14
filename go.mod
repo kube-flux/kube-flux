@@ -1,4 +1,4 @@
-module github.com/USF-VMware-EnergyAwareDatacenter-2020/kube-flux
+module github.com/kube-flux/kube-flux
 
 go 1.15
 

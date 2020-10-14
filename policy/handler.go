@@ -13,7 +13,8 @@ import (
 const (
 	policyDB      = "policy.db"
 	policyBucket  = "policyBucket"
-	defaultPolicy = Black
+	defaultPolicy = Green
+	dbOpenTimeout = 1 * time.Second
 )
 
 type policyHandler struct {
@@ -22,7 +23,7 @@ type policyHandler struct {
 
 func NewPolicyHandler() (*policyHandler, error) {
 	log.Println("func", "NewPolicyHandler", "Opening db")
-	db, err := bolt.Open(policyDB, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(policyDB, 0600, &bolt.Options{Timeout: dbOpenTimeout})
 	if err != nil {
 		log.Println("func", "NewPolicyHandler", "Failed to initialize db", "err:", err)
 		return nil, err
@@ -58,7 +59,6 @@ func NewPolicyHandler() (*policyHandler, error) {
 
 func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("func", "ServeHTTP", "Start handling policy request")
-	defer log.Println("func", "ServeHTTP", "Finished handling policy request")
 
 	// Setup response
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -126,7 +126,7 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 				log.Println("func", "NewPolicyHandler", "Failed to put status", "err:", err)
 				return err
 			}
-			if err := bucket.Put([]byte("UpdatedAt"), []byte(policy.UpdatedAt)); err != nil {
+			if err := bucket.Put([]byte("UpdatedAt"), []byte(time.Now().String())); err != nil {
 				log.Println("func", "NewPolicyHandler", "Failed to put UpdatedAt", "err:", err)
 				return err
 			}
@@ -140,4 +140,5 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
+	log.Println("func", "ServeHTTP", "Finished handling policy request")
 }

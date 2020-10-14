@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/USF-VMware-EnergyAwareDatacenter-2020/kube-flux/policy"
+	"github.com/kube-flux/kube-flux/policy"
 )
 
 func main() {
