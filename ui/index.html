@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <title>kube-flux policy UI</title>
+</head>
+
+<body>
+  <div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">kube-flux policy UI</div>
+      <div class="panel-body">
+        <h1>Set Kubernetes Cluster Energy Policy</h1><br>
+        <h4>Click to check the current energy signal</h4>
+        <button type="button" id="current" class="btn btn-info" onclick="myFunctionCurrent(id)">Current</button>
+        <script>
+          async function myFunctionCurrent(id) {
+            const data = {}
+            const options = {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+            }
+            const response = await fetch('http://localhost:9999/', options)
+              .then(response => response.json())
+              .then(data => {
+                console.log('Success:', JSON.stringify(data))
+                document.getElementById("msg1").innerHTML = "Current Status is " + JSON.stringify(data).split('\"')[3]
+                document.getElementById("msg2").innerHTML = "Updated at " + JSON.stringify(data).split('\"')[7]
+              })
+              .catch((error) => {
+                console.error('Error:', error)
+              })
+          }
+        </script><br><br>
+        <p id="msg1"></p>
+        <p id="msg2"></p><br><br>
+        <h4>Click to choose an energy signal</h4>
+        <button type="button" id="Green" class="btn btn-success" onclick="myFunction(id)">Green</button>
+        <button type="button" id="Brown" class="btn btn-warning" onclick="myFunction(id)">Brown</button>
+        <button type="button" id="Black" class="btn btn-basic" onclick="myFunction(id)">Black</button>
+        <script>
+          async function myFunction(id) {
+            document.getElementById("msg3").innerHTML = id + " Button clicked!"
+            const data = { 'Status': id }
+            const options = {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            }
+            const response = await fetch('http://localhost:9999/', options)
+              .then(response => {
+                console.log('Success:', response)
+              })
+              .catch((error) => {
+                console.error('Error:', error)
+              })
+          }
+        </script><br><br>
+        <p id="msg3"></p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

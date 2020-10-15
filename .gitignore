@@ -10,6 +10,7 @@
 *.pem
 *.json
 *.terraform
+*.db
 terraform.tfstate
 terraform.tfstate.backup
 
