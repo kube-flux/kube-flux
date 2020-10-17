@@ -89,9 +89,9 @@ func changeReplica(clientSet *kubernetes.Clientset, signal Status) {
 	switch signal {
 	case Green:
 		newReplica = 4
-	case Brown:
+	case Yellow:
 		newReplica = 2
-	case Black:
+	case Red:
 		newReplica = 1
 	}
 

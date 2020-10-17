@@ -1,12 +1,12 @@
 package midterm
 
-// Status represents Policy energy consumption status: Green, Brown, Black
+// Status represents Policy energy consumption status: Green, Yellow, Red
 type Status string
 
 const (
 	Green Status = "Green"
-	Brown Status = "Brown"
-	Black Status = "Black"
+	Yellow Status = "Yellow"
+	Red Status = "Red"
 )
 
 // Policy defines the object that maintains energy related status
