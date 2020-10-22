@@ -1,12 +1,12 @@
 provider "google" {
   credentials = file("tf-key.json")
 
-  project = "energy-aware-p1"
+  project = "kube-flux"
   region  = "us-central1"
   zone    = "us-central1-b"
 }
 resource "google_container_cluster" "primary" {
-  name     = "my-gke-cluster"
+  name     = "kube-flux-cluster-1"
   location = "us-central1"
 
   # We can't create a cluster with no node pool defined, but we want to only use
