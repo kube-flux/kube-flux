@@ -40,9 +40,12 @@
         <p id="msg1"></p>
         <p id="msg2"></p><br><br>
         <h4>Click to choose an energy signal</h4>
-        <button type="button" id="Green" class="btn btn-success" onclick="myFunction(id)">Green</button>
-        <button type="button" id="Brown" class="btn btn-warning" onclick="myFunction(id)">Brown</button>
-        <button type="button" id="Black" class="btn btn-basic" onclick="myFunction(id)">Black</button>
+        <button type="button" id="Green" class="btn btn-success" style="height:34px;width:72.69px"
+          onclick="myFunction(id)">Green</button>
+        <button type="button" id="Yellow" class="btn btn-warning" style="height:34px;width:72.69px"
+          onclick="myFunction(id)">Yellow</button>
+        <button type="button" id="Red" class="btn btn-danger" style="height:34px;width:72.69px"
+          onclick="myFunction(id)">Red</button>
         <script>
           async function myFunction(id) {
             document.getElementById("msg3").innerHTML = id + " Button clicked!"
