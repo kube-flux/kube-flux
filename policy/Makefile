@@ -1,0 +1,3 @@
+zeus:
+	go fmt github.com/kube-flux/kube-flux/...
+	go build -o ./build/zeus ./main/main.go
