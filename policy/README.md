@@ -20,6 +20,8 @@ To run it:
 
 ```docker run -d -it -p 8080:9999 --name zeus -v my-vol:/app <tag> --rm```
 
+And now you can access it with `localhost:8080` on your browser
+
 ## How to deploy it in Minikube
 1. Tunnel the docker-env to Minikube
 
