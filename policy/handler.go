@@ -125,9 +125,9 @@ func (handler *policyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 				log.Println("func", "ServeHTTP", "err:", err)
 				return err
 			}
-			policy.UpdatedAt = time.Now().String()
 
 			// Update Status
+			policy.UpdatedAt = time.Now().String()
 			policyByteArray, err := json.Marshal(policy)
 			if err != nil {
 				log.Println("func", "NewPolicyHandler", "Failed to encode policy struct", "err:", err)
