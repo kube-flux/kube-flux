@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: zeus
+  name: zeus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeus
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: zeus
+    spec:
+      containers:
+        - image: kube-flux/zeus:0.0.2
+          name: zeus
+          imagePullPolicy: Never
+          resources: {}
+          ports:
+            - containerPort: 9999
+status: {}
