@@ -18,7 +18,7 @@ spec:
         app: zeus
     spec:
       containers:
-        - image: kube-flux/zeus:0.0.2
+        - image: us.gcr.io/booming-triode-290502/kube-flux-zeus:0.0.2
           name: zeus
           imagePullPolicy: Never
           resources: {}

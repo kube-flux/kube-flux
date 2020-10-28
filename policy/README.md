@@ -22,7 +22,7 @@ To run it:
 
 And now you can access it with `localhost:8080` on your browser
 
-## How to deploy it in Minikube
+## How to deploy it to Minikube
 1. Tunnel the docker-env to Minikube
 
 `eval $(minikube -p minikube docker-env)`
@@ -42,3 +42,22 @@ And now you can access it with `localhost:8080` on your browser
 5. Check out the service
 
 ```minikube service zeus```
+
+## How to deploy it to GKE
+1. configure your Docker with gcloud:
+
+`gcloud auth configure-docker`
+
+2. Push the image to GCR(Google Cloud Registry):
+
+`docker push us.gcr.io/$booming-triode-290502/kube-flux-zeus:0.0.2`
+
+3. Deploy the container of that image
+
+`kubectl create deployment zeus --image=us.gcr.io/booming-triode-290502/kube-flux-zeus:0.0.2`
+
+4. Expose the Service
+
+`kubectl expose deployment zeus --name=zeus-service --type=LoadBalancer --port 80 --target-port 9999`
+
+Now you'd see the external Ip by calling `kubectl get service`!
