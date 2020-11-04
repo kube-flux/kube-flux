@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: demo-ingress
+  name: ngnix-deployment-ingress
 spec:
   backend:
-    serviceName: demo
+    serviceName: ngnix-deployment
     servicePort: 80
 
