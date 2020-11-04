@@ -4,23 +4,23 @@ metadata:
   name: ngnix-deployment2
   namespace: default
   labels:
-    app: ngnix
+    app: ngnix2
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
-      app: ngnix
+      app: ngnix2
   template:
     metadata:
       annotations:
         imp: "2"
       labels:
-        app: ngnix
+        app: ngnix2
     spec:
       containers:
         - image: nginx:latest
           imagePullPolicy: IfNotPresent
-          name: ngnix
+          name: ngnix2
           ports:
             - containerPort: 80
               protocol: TCP
