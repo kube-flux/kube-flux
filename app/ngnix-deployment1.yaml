@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngnix-deployment1
+  namespace: default
+  labels:
+    app: ngnix
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: ngnix
+  template:
+    metadata:
+      annotations:
+        imp: "1"
+      labels:
+        app: ngnix
+    spec:
+      containers:
+        - image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          name: ngnix
+          ports:
+            - containerPort: 80
+              protocol: TCP
+              
