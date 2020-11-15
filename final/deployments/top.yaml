@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: top
+  name: top
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: top
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: top
+    spec:
+      containers:
+        - image: us.gcr.io/kube-flux/kube-flux-zeus
+          name: top
+          imagePullPolicy: Never
+          resources: {}
+          ports:
+            - containerPort: 9999
+status: {}

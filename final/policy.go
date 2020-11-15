@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
+
+	"k8s.io/client-go/kubernetes"
 )
 
 // ----------------- policy -----------------
@@ -14,9 +16,17 @@ type Policy struct {
 	Factor map[string]map[string]int32
 }
 
-var policy *Policy
+var (
+	policy              *Policy
+	filePath, clusterIP string
+	clientSet           *kubernetes.Clientset
+)
 
 func init() {
+	filePath = "/Users/tong/workspace/master-project/kube-flux/final/ca.pem"
+	clusterIP = "34.123.186.187"
+	clientSet = Authenticate(filePath, clusterIP)
+
 	green := map[string]int32{"Top": 4, "Medium": 4, "Low": 4}
 	yellow := map[string]int32{"Top": 2, "Medium": 2, "Low": 2}
 	red := map[string]int32{"Top": 1, "Medium": 1, "Low": 1}
@@ -68,7 +78,7 @@ func Backend(w http.ResponseWriter, req *http.Request) {
 		}
 
 		policy.Status = request.Status
-		executePolicy()
+		ChangeReplica(clientSet, policy)
 		return
 	}
 }
@@ -93,9 +103,5 @@ func Factor(w http.ResponseWriter, req *http.Request) {
 
 func setFactor(factor map[string]map[string]int32) {
 	policy.Factor = factor
-	executePolicy()
-}
-
-func executePolicy() {
-	// TODO
+	ChangeReplica(clientSet, policy)
 }
