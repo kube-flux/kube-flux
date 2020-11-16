@@ -79,6 +79,7 @@ func Backend(w http.ResponseWriter, req *http.Request) {
 
 		policy.Status = request.Status
 		ChangeReplica(clientSet, policy)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 }

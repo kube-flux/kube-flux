@@ -18,9 +18,9 @@ spec:
         app: medium
     spec:
       containers:
-        - image: us.gcr.io/kube-flux/kube-flux-zeus
+        - image: us.gcr.io/kube-flux/kube-flux-zeus:0.0.3
           name: medium
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           resources: {}
           ports:
             - containerPort: 9999
