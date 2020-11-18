@@ -117,7 +117,7 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 		MapLabel := "app=" + currLabel
 		pods, _ := clientSet.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: MapLabel})
 		rand.Seed(time.Now().UnixNano())
-		fmt.Printf("   Totoal Number of pods: %d\n", len(pods.Items))
+		fmt.Printf("   Total Number of pods: %d\n", len(pods.Items))
 
 		// loop through the pods
 		for j := range pods.Items {
@@ -127,7 +127,10 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 			fmt.Printf("   Pod name: \t\t\t%s\n", currPodName)
 			fmt.Printf("   Current imp: \t\t%s\n", currPodImp)
 			// calculate the sum of cpu and memory
-			getPodUsage(currPodName, currPodImp, clientSet)
+			err = getPodUsage(currPodName, currPodImp, clientSet)
+			if err != nil {
+				panic(err.Error())
+			}
 		}
 		fmt.Println()
 	}
@@ -138,13 +141,12 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 }
 
 func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset) error {
-	absPath := fmt.Sprint("apis/metrics.k8s.io/v1beta1/namespaces/default/pods/", podName)
+	absPath := "apis/metrics.k8s.io/v1beta1/namespaces/default/pods/" + podName
 	data, err := clientSet.RESTClient().Get().AbsPath(absPath).DoRaw(context.TODO())
 	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(data, &singlePodObj)
-	// fmt.Print(singlePodObj)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -193,19 +195,19 @@ func main() {
 	printPodUsageImp(clientSet)                    //Print the usage of CPU memory in each imp
 	// change the replica-set num accordingly
 	if Memo_Map["1"] > 10000 || Memo_Map["2"] > 8000 || Memo_Map["3"] > 6000 {
-		changeReplica(clientSet, 3, 3)
-		changeReplica(clientSet, 2, 4)
-		changeReplica(clientSet, 1, 5)
-	} else if Memo_Map["1"] > 80000 || Memo_Map["2"] > 6000 || Memo_Map["3"] > 4000 {
-		changeReplica(clientSet, 3, 2)
+		//change imp3 3-->0
+		//change imp2 5-->3
+		//change imp1 6-->4
+		changeReplica(clientSet, 3, 0)
 		changeReplica(clientSet, 2, 3)
 		changeReplica(clientSet, 1, 4)
-	} else if Memo_Map["1"] > 6000 || Memo_Map["2"] > 4000 || Memo_Map["3"] > 2000 {
-		changeReplica(clientSet, 3, 1)
-		changeReplica(clientSet, 2, 2)
-		changeReplica(clientSet, 1, 3)
-	} else {
+	} else if Memo_Map["1"] > 80000 || Memo_Map["2"] > 6000 || Memo_Map["3"] > 4000 {
+		//change imp3 3-->0
+		//change imp2 5-->3
 		changeReplica(clientSet, 3, 0)
-		changeReplica(clientSet, 2, 0)
+		changeReplica(clientSet, 2, 3)
+	} else if Memo_Map["1"] > 6000 || Memo_Map["2"] > 4000 || Memo_Map["3"] > 2000 {
+		//change imp3 3-->0
+		changeReplica(clientSet, 3, 0)
 	}
 }
