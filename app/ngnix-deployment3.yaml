@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngnix-deployment3
+  namespace: test
+  labels:
+    app: ngnix3
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: ngnix3
+  template:
+    metadata:
+      annotations:
+        imp: "3"
+      labels:
+        app: ngnix3
+    spec:
+      containers:
+        - image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          name: ngnix3
+          ports:
+            - containerPort: 80
+              protocol: TCP
