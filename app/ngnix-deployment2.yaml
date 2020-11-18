@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ngnix-deployment2
-  namespace: default
+  namespace: test
   labels:
     app: ngnix2
 spec:
-  replicas: 5
+  replicas: 8
   selector:
     matchLabels:
       app: ngnix2
