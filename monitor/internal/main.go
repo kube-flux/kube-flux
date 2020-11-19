@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -53,35 +51,6 @@ type PodMetric struct {
 
 var singlePodObj PodMetric // single pod structure object
 
-// PodMetricsList stores the JSON Array of pod information.
-type PodMetricsList struct {
-	Kind       string `json:"kind"`
-	APIVersion string `json:"apiVersion"`
-	Metadata   struct {
-		SelfLink string `json:"selfLink"`
-	} `json:"metadata"`
-	Items []struct {
-		Metadata struct {
-			Name              string    `json:"name"`
-			Namespace         string    `json:"namespace"`
-			SelfLink          string    `json:"selfLink"`
-			Imp               string    `json:"imp"`
-			CreationTimestamp time.Time `json:"creationTimestamp"`
-		} `json:"metadata"`
-		Timestamp  time.Time `json:"timestamp"`
-		Window     string    `json:"window"`
-		Containers []struct {
-			Name  string `json:"name"`
-			Usage struct {
-				CPU    string `json:"cpu"`
-				Memory string `json:"memory"`
-			} `json:"usage"`
-		} `json:"containers"`
-	} `json:"items"`
-}
-
-var podsObj PodMetricsList // pods structure object
-
 // authenticate is used to authenticate Go-client with GKE cluster.
 func authenticate(filePath string, HostIp string) *kubernetes.Clientset {
 	MasterUrl := "https://" + HostIp
@@ -97,14 +66,14 @@ func authenticate(filePath string, HostIp string) *kubernetes.Clientset {
 		AuthProvider: &clientcmd.AuthProviderConfig{Name: "gcp"}}
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		panic("Failed to authenticate IP: " + HostIp)
 	}
 	return clientSet
 }
 
 //printPodUsageImp prints the cpu and memory sum of pods in each the importance factor.
-func printPodUsageImp(clientSet *kubernetes.Clientset) {
-	namespace := apiv1.NamespaceDefault
+func printPodUsageImp(clientSet *kubernetes.Clientset, currNamespace string) {
+	namespace := currNamespace
 	deployments, err := clientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err)
@@ -116,7 +85,6 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 		fmt.Printf("   Label: \t%s\n", dep.GetLabels()["app"])
 		MapLabel := "app=" + currLabel
 		pods, _ := clientSet.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: MapLabel})
-		rand.Seed(time.Now().UnixNano())
 		fmt.Printf("   Total Number of pods: %d\n", len(pods.Items))
 
 		// loop through the pods
@@ -127,7 +95,8 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 			fmt.Printf("   Pod name: \t\t\t%s\n", currPodName)
 			fmt.Printf("   Current imp: \t\t%s\n", currPodImp)
 			// calculate the sum of cpu and memory
-			err = getPodUsage(currPodName, currPodImp, clientSet)
+			fmt.Printf("Pod Name: " + currPodName)
+			err = getPodUsage(currPodName, currPodImp, clientSet, namespace)
 			if err != nil {
 				panic(err.Error())
 			}
@@ -135,13 +104,13 @@ func printPodUsageImp(clientSet *kubernetes.Clientset) {
 		fmt.Println()
 	}
 	// TODO: CPU_Map["1"] is CPU_map which key is imp "1"  Memo_Map["1"] is Memo_Map which key is imp "1"
-	for key, _ := range CPU_Map {
+	for key := range CPU_Map {
 		fmt.Printf("Imp %s:\tSum of CPU is %.2f\n\tSum of Memo is %.2f\n", key, CPU_Map[key], Memo_Map[key])
 	}
 }
 
-func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset) error {
-	absPath := "apis/metrics.k8s.io/v1beta1/namespaces/default/pods/" + podName
+func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset, currNamespace string) error {
+	absPath := "apis/metrics.k8s.io/v1beta1/namespaces/" + currNamespace + "/pods/" + podName
 	data, err := clientSet.RESTClient().Get().AbsPath(absPath).DoRaw(context.TODO())
 	if err != nil {
 		return err
@@ -151,10 +120,10 @@ func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset) er
 		panic(err.Error())
 	}
 
-	tempMemmoString := strings.TrimRight(singlePodObj.Containers[0].Usage.Memory, "Ki")
-	tempCPUString := singlePodObj.Containers[0].Usage.CPU
+	tempMemoString := strings.TrimRight(singlePodObj.Containers[0].Usage.Memory, "Ki")
+	tempCPUString := strings.TrimRight(singlePodObj.Containers[0].Usage.CPU, "n")
 	currentCPUUsage, _ := strconv.ParseFloat(tempCPUString, 2)
-	currentMemoUsage, _ := strconv.ParseFloat(tempMemmoString, 2)
+	currentMemoUsage, _ := strconv.ParseFloat(tempMemoString, 2)
 
 	fmt.Printf("   Current CPU usage: \t\t%.2f\n", currentCPUUsage)
 	fmt.Printf("   Current Memory usage: \t%.2f\n", currentMemoUsage)
@@ -164,14 +133,15 @@ func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset) er
 }
 
 // changeReplica changes the number of replica-sets of a certain deployment.
-func changeReplica(clientSet *kubernetes.Clientset, imp int32, threshold int32) {
-	namespace := apiv1.NamespaceDefault
+func changeReplica(clientSet *kubernetes.Clientset, currNamespace string, imp int32, threshold int32) {
+	namespace := currNamespace
 	deployment, err := clientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err)
 	}
 	// TODO: hard coded deployment.Items[imp]
 	nginx := deployment.Items[imp-1]
+	print(*(nginx.Spec.Replicas))
 	currReplicaNum := *(nginx.Spec.Replicas)
 	fmt.Printf("Previous number of replica-set deployed in imp %d: %d\n", imp, currReplicaNum)
 	var newReplicaNum int32
@@ -191,23 +161,24 @@ func changeReplica(clientSet *kubernetes.Clientset, imp int32, threshold int32) 
 func main() {
 	filePath := os.Args[1]                         //Pass .pem file as a command line argument
 	clusterIP := os.Args[2]                        //Pass cluster IP address
+	currNamespace := os.Args[3]                    //Pass the namespace
 	clientSet := authenticate(filePath, clusterIP) //Authenticates with the GCP cluster
-	printPodUsageImp(clientSet)                    //Print the usage of CPU memory in each imp
+	printPodUsageImp(clientSet, currNamespace)     //Print the usage of CPU memory in each imp
 	// change the replica-set num accordingly
 	if Memo_Map["1"] > 10000 || Memo_Map["2"] > 8000 || Memo_Map["3"] > 6000 {
 		//change imp3 3-->0
 		//change imp2 5-->3
 		//change imp1 6-->4
-		changeReplica(clientSet, 3, 0)
-		changeReplica(clientSet, 2, 3)
-		changeReplica(clientSet, 1, 4)
+		changeReplica(clientSet, currNamespace, 3, 0)
+		changeReplica(clientSet, currNamespace, 2, 3)
+		changeReplica(clientSet, currNamespace, 1, 4)
 	} else if Memo_Map["1"] > 80000 || Memo_Map["2"] > 6000 || Memo_Map["3"] > 4000 {
 		//change imp3 3-->0
 		//change imp2 5-->3
-		changeReplica(clientSet, 3, 0)
-		changeReplica(clientSet, 2, 3)
+		changeReplica(clientSet, currNamespace, 3, 0)
+		changeReplica(clientSet, currNamespace, 2, 3)
 	} else if Memo_Map["1"] > 6000 || Memo_Map["2"] > 4000 || Memo_Map["3"] > 2000 {
 		//change imp3 3-->0
-		changeReplica(clientSet, 3, 0)
+		changeReplica(clientSet, currNamespace, 3, 0)
 	}
 }
