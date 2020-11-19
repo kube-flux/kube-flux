@@ -121,7 +121,7 @@ func getPodUsage(podName string, imp string, clientSet *kubernetes.Clientset, cu
 	}
 
 	tempMemoString := strings.TrimRight(singlePodObj.Containers[0].Usage.Memory, "Ki")
-	tempCPUString := singlePodObj.Containers[0].Usage.CPU
+	tempCPUString := strings.TrimRight(singlePodObj.Containers[0].Usage.CPU, "n")
 	currentCPUUsage, _ := strconv.ParseFloat(tempCPUString, 2)
 	currentMemoUsage, _ := strconv.ParseFloat(tempMemoString, 2)
 
