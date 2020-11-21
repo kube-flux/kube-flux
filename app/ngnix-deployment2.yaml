@@ -1,23 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ngnix-deployment
-  namespace: default
+  name: ngnix-deployment2
+  namespace: test
+  labels:
+    app: ngnix2
 spec:
-  replicas: 4
+  replicas: 8
   selector:
     matchLabels:
-      run: ngnix-deployment
+      app: ngnix2
   template:
     metadata:
+      annotations:
+        imp: "2"
       labels:
-        run: ngnix-deployment
+        app: ngnix2
     spec:
       containers:
         - image: nginx:latest
           imagePullPolicy: IfNotPresent
-          name: ngnix-deployment
+          name: ngnix2
           ports:
             - containerPort: 80
               protocol: TCP
-

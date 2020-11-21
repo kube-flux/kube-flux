@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo
+  name: ngnix-deployment
   namespace: default
 spec:
   ports:
@@ -9,6 +9,6 @@ spec:
       protocol: TCP
       targetPort: 80
   selector:
-    run: demo
+    run: ngnix-deployment
   type: NodePort
 
