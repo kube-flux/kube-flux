@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ngnix3
 spec:
-  replicas: 6
+  replicas: 10
   selector:
     matchLabels:
       app: ngnix3
@@ -18,9 +18,10 @@ spec:
         app: ngnix3
     spec:
       containers:
-        - image: nginx:latest
-          imagePullPolicy: IfNotPresent
+        - image: us.gcr.io/kube-flux/kube-flux-zeus:0.0.3
           name: ngnix3
+          imagePullPolicy: Always
+          resources: {}
           ports:
-            - containerPort: 80
-              protocol: TCP
+            - containerPort: 9999
+status: {}
