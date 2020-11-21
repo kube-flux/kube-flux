@@ -27,9 +27,9 @@ func init() {
 	clusterIP = "34.123.186.187"
 	clientSet = Authenticate(filePath, clusterIP)
 
-	green := map[string]int32{"Top": 4, "Medium": 4, "Low": 4}
-	yellow := map[string]int32{"Top": 2, "Medium": 2, "Low": 2}
-	red := map[string]int32{"Top": 1, "Medium": 1, "Low": 1}
+	green := map[string]int32{"Top": 4, "Medium": 4, "Low": 0}
+	yellow := map[string]int32{"Top": 2, "Medium": 2, "Low": 0}
+	red := map[string]int32{"Top": 1, "Medium": 1, "Low": 0}
 
 	initFactor := map[string]map[string]int32{"Green": green, "Yellow": yellow, "Red": red}
 
@@ -105,4 +105,17 @@ func Factor(w http.ResponseWriter, req *http.Request) {
 func setFactor(factor map[string]map[string]int32) {
 	policy.Factor = factor
 	ChangeReplica(clientSet, policy)
+}
+
+func IMfunction() {
+	// observe the metrics
+	// do the calculation
+	// update outcome to Zeus
+	green := map[string]int32{"High": 4, "Medium": 2, "Low": 2}
+	yellow := map[string]int32{"High": 2, "Medium": 1, "Low": 1}
+	red := map[string]int32{"High": 1, "Medium": 0, "Low": 0}
+
+	newFactor := map[string]map[string]int32{"Green": green, "Yellow": yellow, "Red": red}
+	setFactor(newFactor)
+
 }

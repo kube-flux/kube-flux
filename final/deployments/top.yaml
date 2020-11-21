@@ -18,7 +18,7 @@ spec:
         app: top
     spec:
       containers:
-        - image: us.gcr.io/kube-flux/kube-flux-zeus:0.0.3
+        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.1
           name: top
           imagePullPolicy: Always
           resources: {}
