@@ -1,0 +1,8 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: internal-monitor
+spec:
+  backend:
+    serviceName: internal-monitor
+    servicePort: 80

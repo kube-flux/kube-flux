@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: internal-monitoring
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: internal-monitor
+  template:
+    metadata:
+      labels:
+        run: internal-monitor
+    spec:
+      containers:
+        - image: us.gcr.io/kube-flux/internal-monitor-metrics-api:stable
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          imagePullPolicy: IfNotPresent
+          name: internal-monitor
+          ports:
+            - containerPort: 8080
+              protocol: TCP
