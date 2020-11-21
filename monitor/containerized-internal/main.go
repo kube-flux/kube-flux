@@ -10,6 +10,7 @@ import (
 	"k8s.io/client-go/rest"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 	"net/http"
+	"sync"
 )
 
 // CPU_Map is a map stores importance factor and sumOfCpu.
@@ -45,6 +46,9 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		panic("Error fetching Deployments: " + err.Error())
 	}
+	//Mutex locks prevents concurrent writes to the hashmap.
+	var mutex = &sync.Mutex{}
+	mutex.Lock()
 	for i, dep := range deployments.Items {
 		currLabel := dep.GetLabels()["app"]
 		_, _ = fmt.Fprintf(w, "%d) Deployment: \t%s\n", i+1, dep.GetName())
@@ -63,7 +67,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 			cpu, _ := metricsPod.Containers[0].Usage.Cpu().AsInt64()
 			mem, _ := metricsPod.Containers[0].Usage.Memory().AsInt64()
 			cpuMap[currPodImp] += cpu
-			cpuMap[currPodImp] += mem
+			memoryMap[currPodImp] += mem
 		}
 	}
 	for key := range cpuMap {
@@ -73,6 +77,7 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 	//Clearing contents inside the maps
 	cpuMap = make(map[string]int64)
 	memoryMap = make(map[string]int64)
+	mutex.Unlock()
 }
 
 func main() {
