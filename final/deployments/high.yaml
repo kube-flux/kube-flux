@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: high
+  name: high
+  namespace: final
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: high
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        imp: "1"
+      creationTimestamp: null
+      labels:
+        app: high
+    spec:
+      containers:
+        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.2
+          name: high
+          imagePullPolicy: Always
+          resources: {}
+          ports:
+            - containerPort: 9999
+status: {}
