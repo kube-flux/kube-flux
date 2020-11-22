@@ -18,10 +18,11 @@ spec:
         app: ngnix1
     spec:
       containers:
-        - image: nginx:latest
-          imagePullPolicy: IfNotPresent
-          name: ngnix1
+        - image: us.gcr.io/kube-flux/kube-flux-zeus:0.0.3
+          name: ngnix3
+          imagePullPolicy: Always
+          resources: {}
           ports:
-            - containerPort: 80
-              protocol: TCP
+            - containerPort: 9999
+status: {}
               

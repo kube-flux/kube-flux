@@ -17,12 +17,12 @@ import (
 	clientcmd "k8s.io/client-go/tools/clientcmd/api"
 )
 
-// cpuMap is a map stores importance factor and sum of CPU usage.
+// cpuMap is a map stores importance factor and average CPU usage.
 var (
 	cpuMap = make(map[string]float64)
 )
 
-// memoryMap is a map stores importance factor and sum of memory usage.
+// memoryMap is a map stores importance factor and average memory usage.
 var (
 	memoryMap = make(map[string]float64)
 )
@@ -71,7 +71,7 @@ func authenticate(filePath string, HostIp string) *kubernetes.Clientset {
 	return clientSet
 }
 
-// printDeploymentInfo prints the cpu and memory sum of pods in each the importance factor.
+// printDeploymentInfo prints the cpu and memory average of pods in each the importance factor.
 func printDeploymentInfo(clientSet *kubernetes.Clientset, namespace string) {
 	deployments, err := clientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -85,24 +85,30 @@ func printDeploymentInfo(clientSet *kubernetes.Clientset, namespace string) {
 		fmt.Printf("   Label: \t%s\n", dep.GetLabels()["app"])
 		MapLabel := "app=" + currLabel
 		pods, _ := clientSet.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: MapLabel})
-		fmt.Printf("   Total Number of pods: %d\n", len(pods.Items))
-
+		numOfPods := len(pods.Items)
+		fmt.Printf("   Total Number of pods: %d\n", numOfPods)
+		currPodImp := ""
 		// loop through the pods
 		for j := range pods.Items {
 			currPod := pods.Items[j]
-			currPodImp := currPod.GetAnnotations()["imp"]
+			currPodImp = currPod.GetAnnotations()["imp"]
 			currPodName := currPod.GetName()
 			// calculate the sum of cpu and memory and save to map
-			err = printSumPodUsage(currPodName, currPodImp, clientSet, namespace)
+			err = sumPodUsage(currPodName, currPodImp, clientSet, namespace)
 			if err != nil {
 				panic(err.Error())
 			}
 		}
+		// get the ave of the pods in each deployment
+		if numOfPods != 0 {
+			cpuMap[currPodImp] = cpuMap[currPodImp] / float64(numOfPods)
+			memoryMap[currPodImp] = memoryMap[currPodImp] / float64(numOfPods)
+		}
 	}
 }
 
-// printSumPodUsage print single pod info, then sums the cpu and memory usage of pods in the same importance factor.
-func printSumPodUsage(podName string, imp string, clientSet *kubernetes.Clientset, namespace string) error {
+// sumPodUsage print single pod info, then sums the cpu and memory usage of pods in the same importance factor.
+func sumPodUsage(podName string, imp string, clientSet *kubernetes.Clientset, namespace string) error {
 	absPath := "apis/metrics.k8s.io/v1beta1/namespaces/" + namespace + "/pods/" + podName
 	data, err := clientSet.RESTClient().Get().AbsPath(absPath).DoRaw(context.TODO())
 	if err != nil {
@@ -144,12 +150,15 @@ func changeReplica(clientSet *kubernetes.Clientset, namespace string, imp int32,
 		fmt.Printf("\t\t\tNothing need to be changed.\n")
 		return
 	}
-	if currReplicaNum > num && action == "susbtract" {
+	if currReplicaNum > num && action == "subtract" {
 		newReplicaNum = num
 		fmt.Printf("\t\t\tOff %d replica-set.\n", currReplicaNum-num)
 	} else if currReplicaNum < num && action == "add" {
 		newReplicaNum = num
 		fmt.Printf("\t\t\tOn %d replica-set.\n", num-currReplicaNum)
+	} else {
+		fmt.Printf("\t\t\tNothing need to be changed.\n")
+		return
 	}
 	// update the replica-set number
 	*(nginx.Spec.Replicas) = newReplicaNum
@@ -161,41 +170,35 @@ func changeReplica(clientSet *kubernetes.Clientset, namespace string, imp int32,
 func printCurrPodUsage() {
 	// cpuMap["1"] is cpuMap which key is imp "1"  memoryMap["1"] is memoryMap which key is imp "1"
 	for key := range cpuMap {
-		fmt.Printf("Importance Factor %s) \tSum of CPU: \t%.2f\n\t\t\tSum of Memory: \t%.2f\n", key, cpuMap[key], memoryMap[key])
+		fmt.Printf("Importance Factor %s) \tAverage of CPU: \t%.2f\n\t\t\tAverage of Memory: \t%.2f\n", key, cpuMap[key], memoryMap[key])
 	}
 }
 
-// audoAdjustReplica changes the replica-set num based on CPU and memory usage.
-func audoAdjustReplica(clientSet *kubernetes.Clientset, namespace string) {
+// autoAdjustReplica changes the replica-set num based on CPU and memory usage.
+func autoAdjustReplica(clientSet *kubernetes.Clientset, namespace string) {
 	fmt.Printf("\n--------------------- [Change of Relica-set] ---------------------\n")
-	if memoryMap["1"] > 16000 || memoryMap["2"] > 16000 || memoryMap["3"] > 16000 || cpuMap["1"] > 13000000 || cpuMap["2"] > 13000000 || cpuMap["3"] > 13000000 {
-		// if too high, susbtract to ~6 pods
-		changeReplica(clientSet, namespace, 3, 1, "susbtract")
-		changeReplica(clientSet, namespace, 2, 2, "susbtract")
-		changeReplica(clientSet, namespace, 1, 3, "susbtract")
-	} else if memoryMap["1"] > 20000 || memoryMap["2"] > 20000 || memoryMap["3"] > 20000 || cpuMap["1"] > 10000000 || cpuMap["2"] > 10000000 || cpuMap["3"] > 10000000 {
-		// if too high, susbtract to ~6 pods
-		changeReplica(clientSet, namespace, 3, 0, "susbtract")
-		changeReplica(clientSet, namespace, 2, 2, "susbtract")
-		changeReplica(clientSet, namespace, 1, 4, "susbtract")
-	} else if memoryMap["1"] > 25000 || memoryMap["2"] > 25000 || memoryMap["3"] > 25000 || cpuMap["1"] > 3000000 || cpuMap["2"] > 3000000 || cpuMap["3"] > 3000000 {
-		// if too high, susbtract to ~6 pods
-		changeReplica(clientSet, namespace, 3, 0, "susbtract")
-		changeReplica(clientSet, namespace, 2, 1, "susbtract")
-		changeReplica(clientSet, namespace, 1, 5, "susbtract")
-	} else if memoryMap["1"] < 3000 || memoryMap["2"] < 3000 || memoryMap["3"] < 3000 || cpuMap["1"] < 3000 || cpuMap["2"] < 3000 || cpuMap["3"] < 3000 {
-		// if too low, scale to ~9 pods
-		changeReplica(clientSet, namespace, 3, 3, "add")
-		changeReplica(clientSet, namespace, 2, 3, "add")
-		changeReplica(clientSet, namespace, 1, 3, "add")
+
+	if cpuMap["1"] > 1000 || cpuMap["2"] > 1000 || cpuMap["3"] > 1000 {
+		// if too high, subtract down
+		fmt.Printf("Subtracting...\n")
+		changeReplica(clientSet, namespace, 3, 3, "subtract")
+		changeReplica(clientSet, namespace, 2, 8, "subtract")
+		changeReplica(clientSet, namespace, 1, 10, "subtract")
+	} else if cpuMap["1"] < 800 || cpuMap["2"] < 800 || cpuMap["3"] < 800 {
+		// if too low, scale up
+		fmt.Printf("Adding...\n")
+		changeReplica(clientSet, namespace, 3, 10, "add")
+		changeReplica(clientSet, namespace, 2, 10, "add")
+		changeReplica(clientSet, namespace, 1, 10, "add")
 	} else {
 		fmt.Printf("Nothing need to be changed.\n")
-		return
 	}
+
+	return
 }
 
-// sumCurrPodUsage sums the cpu and memory usage of pods in the same importance factor.
-func sumCurrPodUsage(clientSet *kubernetes.Clientset, namespace string) error {
+// aveCurrPodUsage calculate the average cpu and memory usage of pods in the same importance factor.
+func aveCurrPodUsage(clientSet *kubernetes.Clientset, namespace string) error {
 	deployments, err := clientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err)
@@ -211,12 +214,14 @@ func sumCurrPodUsage(clientSet *kubernetes.Clientset, namespace string) error {
 		currLabel := dep.GetLabels()["app"]
 		MapLabel := "app=" + currLabel
 		pods, _ := clientSet.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: MapLabel})
+		numOfPods := len(pods.Items)
+		currPodImp := ""
 		// loop through the pods
 		for j := range pods.Items {
 			currPod := pods.Items[j]
-			currPodImp := currPod.GetAnnotations()["imp"]
+			currPodImp = currPod.GetAnnotations()["imp"]
 			currPodName := currPod.GetName()
-			// calculate the sum of cpu and memory and save to map
+			// calculate the average of cpu and memory and save to map
 			absPath := "apis/metrics.k8s.io/v1beta1/namespaces/" + namespace + "/pods/" + currPodName
 			data, err := clientSet.RESTClient().Get().AbsPath(absPath).DoRaw(context.TODO())
 			if err != nil {
@@ -237,6 +242,10 @@ func sumCurrPodUsage(clientSet *kubernetes.Clientset, namespace string) error {
 			cpuMap[currPodImp] += currentCPUUsage
 			memoryMap[currPodImp] += currentMemoryUsage
 		}
+		if numOfPods != 0 {
+			cpuMap[currPodImp] = cpuMap[currPodImp] / float64(numOfPods)
+			memoryMap[currPodImp] = memoryMap[currPodImp] / float64(numOfPods)
+		}
 	}
 	return err
 }
@@ -247,17 +256,17 @@ func main() {
 	currNamespace := os.Args[3]                    //Pass the namespace
 	clientSet := authenticate(filePath, clusterIP) //Authenticates with the GCP cluster
 	printDeploymentInfo(clientSet, currNamespace)  //Print the usage of CPU memory in each imp
-	// calculare sum of usage and print
-	fmt.Printf("\n------------------------- [Sum of Usage] -------------------------\n")
+	// calculate the usage and print
+	fmt.Printf("\n----------------------------- [Usage] ----------------------------\n")
 	printCurrPodUsage()
 	// change the replica-set num accordingly
-	audoAdjustReplica(clientSet, currNamespace)
+	autoAdjustReplica(clientSet, currNamespace)
 	// calling Sleep method
 	fmt.Println("\nWaiting for changing the relica-set number.....")
-	time.Sleep(20 * time.Second)
+	time.Sleep(15 * time.Second)
 	fmt.Println("Done!")
-	// calculare sum and print again
-	sumCurrPodUsage(clientSet, currNamespace)
-	fmt.Printf("\n--------------------- [Current Sum of Usage] ---------------------\n")
+	// calculate average usage and print again
+	aveCurrPodUsage(clientSet, currNamespace)
+	fmt.Printf("\n---------------------- [Usage after change] ----------------------\n")
 	printCurrPodUsage()
 }
