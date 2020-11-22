@@ -100,9 +100,7 @@ func printDeploymentInfo(clientSet *kubernetes.Clientset, namespace string) {
 			}
 		}
 		// get the ave of the pods in each deployment
-		if numOfPods == 0 {
-			return
-		} else {
+		if numOfPods != 0 {
 			cpuMap[currPodImp] = cpuMap[currPodImp] / float64(numOfPods)
 			memoryMap[currPodImp] = memoryMap[currPodImp] / float64(numOfPods)
 		}
@@ -244,9 +242,7 @@ func aveCurrPodUsage(clientSet *kubernetes.Clientset, namespace string) error {
 			cpuMap[currPodImp] += currentCPUUsage
 			memoryMap[currPodImp] += currentMemoryUsage
 		}
-		if numOfPods == 0 {
-			return err
-		} else {
+		if numOfPods != 0 {
 			cpuMap[currPodImp] = cpuMap[currPodImp] / float64(numOfPods)
 			memoryMap[currPodImp] = memoryMap[currPodImp] / float64(numOfPods)
 		}
