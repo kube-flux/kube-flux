@@ -5,20 +5,23 @@ metadata:
   labels:
     app: low
   name: low
+  namespace: final
 spec:
-  replicas: 1
+  replicas: 10
   selector:
     matchLabels:
       app: low
   strategy: {}
   template:
     metadata:
+      annotations:
+        imp: "3"
       creationTimestamp: null
       labels:
         app: low
     spec:
       containers:
-        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.1
+        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.2
           name: low
           imagePullPolicy: Always
           resources: {}

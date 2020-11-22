@@ -3,23 +3,26 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: top
-  name: top
+    app: high
+  name: high
+  namespace: final
 spec:
-  replicas: 4
+  replicas: 10
   selector:
     matchLabels:
-      app: top
+      app: high
   strategy: {}
   template:
     metadata:
+      annotations:
+        imp: "1"
       creationTimestamp: null
       labels:
-        app: top
+        app: high
     spec:
       containers:
-        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.1
-          name: top
+        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.2
+          name: high
           imagePullPolicy: Always
           resources: {}
           ports:

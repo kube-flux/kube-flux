@@ -5,20 +5,23 @@ metadata:
   labels:
     app: medium
   name: medium
+  namespace: final
 spec:
-  replicas: 2
+  replicas: 10
   selector:
     matchLabels:
       app: medium
   strategy: {}
   template:
     metadata:
+      annotations:
+        imp: "2"
       creationTimestamp: null
       labels:
         app: medium
     spec:
       containers:
-        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.1
+        - image: us.gcr.io/kube-flux/kube-flux-workload:0.0.2
           name: medium
           imagePullPolicy: Always
           resources: {}
