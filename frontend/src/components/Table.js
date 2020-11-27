@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,19 +14,56 @@ const useStyles = makeStyles({
   },
 });
 
-function createData(name, low, medium, top) {
-  return { name, low, medium, top};
+function createData(name, num) {
+  return { name, num };
 }
 
-const rows = [
-  createData('hello-world1', 4, 4, 4),
-  createData('hello-world2', 0, 4, 0),
-  createData('hello-world3', 4, 2, 4),
-  createData('hello-world4', 0, 4, 4),
-];
-
-export default function BasicTable() {
+export default function BasicTable({ currentStatus }) {
   const classes = useStyles();
+  const [rows, setRows] = useState([])
+
+  function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
+  function useInterval(callback, delay) {
+    const savedCallback = useRef();
+  
+    // Remember the latest callback.
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+  
+    // Set up the interval.
+    useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
+
+  useInterval(() => {
+      const headers = { 'Content-Type': 'application/json' }
+      fetch('http://localhost:8888/policy', headers)
+        .then(response => response.json())
+        .then(data => {
+            let currStatusCap = capitalize(currentStatus)
+            console.log(currStatusCap)
+
+            let result = data.Factor[currStatusCap]
+            let rowsArr = []
+
+            for (const property in result) {
+                rowsArr.push(createData(property, result[property]))
+            }
+
+            setRows(rowsArr)
+        })
+  }, 1000)
 
   return (
     <TableContainer component={Paper}>
@@ -34,9 +71,7 @@ export default function BasicTable() {
         <TableHead>
           <TableRow>
             <TableCell>Deployments</TableCell>
-            <TableCell align="right">Low</TableCell>
-            <TableCell align="right">Medium</TableCell>
-            <TableCell align="right">Top</TableCell>
+            <TableCell align="right">Number of Pods</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -45,9 +80,7 @@ export default function BasicTable() {
               <TableCell component="th" scope="row">
                 {row.name}
               </TableCell>
-              <TableCell align="right">{row.low}</TableCell>
-              <TableCell align="right">{row.medium}</TableCell>
-              <TableCell align="right">{row.top}</TableCell>
+              <TableCell align="right">{row.num}</TableCell>
             </TableRow>
           ))}
         </TableBody>
