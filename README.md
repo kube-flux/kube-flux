@@ -95,3 +95,15 @@ kubectl apply -f top.yaml`
 
 Now you'd see the external Ip by calling `kubectl get service`!
 
+## Starting up the UI
+1. Enter the frontend directory:
+
+`cd frontend`
+
+2. Install dependencies:
+
+`npm install`
+
+3. Run app and open http://localhost:9000 to view it in the browser:
+
+`npm start`
