@@ -66,10 +66,10 @@ And now you can access it with `localhost:8080` on your browser
 
 Now you'd see the external Ip by calling `kubectl get service`!
 
-# Starting the Internal Monitor
+## Running the back-end
 `go run final/main/main.go $PEMPATH <CLUSTER_IP_ADDRESS> <NAMESPACE>`
 
-# Starting up the UI
+## Running the front-end
 + Enter the frontend directory: `cd frontend`
 + Install dependencies: `npm install`
 + Run app and open http://localhost:9000 to view it in the browser: `npm start`
