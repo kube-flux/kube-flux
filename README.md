@@ -1,6 +1,6 @@
 # Kube-flux
 This document shows you how to re-build the whole project.
-## 1. Terraform:
+## Terraform:
 Our system runs on Kubernetes cluster, the first step is to deploy a cluster on Google Kubernetes Engine.
 
 Terraform is an open-source infrastructure as code software tool to provision data center infrastructure.
@@ -12,7 +12,7 @@ For installation, please refer to [install-guide](https://learn.hashicorp.com/tu
 + `terraform init` 
 + `terraform plan` 
 + `terraform apply`
-## 2. Authenticate Kubectl with GKE:
+## Authenticate Kubectl with GKE:
 + Easiest way to authenticate is using `gcloud`. For `gcloud` installation, please refer to [install-guide](https://cloud.google.com/sdk/docs/install)
 + Under GKE cluster, click on the connect button and copy-past `gcloud <command>` and run it in your local terminal.
 + `kubectl config current-context` to cross-reference to currently deployed GKE cluster.
@@ -27,11 +27,11 @@ Deploying apps via kubectl:
 + `kubectl apply -f service.yaml`
 + `kubectl apply -f ingress.yaml`
 
-# Deploy Zeus
+## Deploy Zeus
 
 In the energy-aware datacenter, zeus is responsible to Policy, e.g. receiving energy signal from client, maintaining Policy.
 
-## How to build Docker image
+## How to build the Docker image
 
 For binary, run:
 ```make zeus```
