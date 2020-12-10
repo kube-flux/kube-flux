@@ -121,7 +121,7 @@ In the energy-aware datacenter, Zeus is responsible for Policy, e.g. receiving e
 # For the Future
 If you can help us with these. Please don't hesitate to open a [pull request](https://github.com/kube-flux/kube-flux/pulls).
 
-## Project Maintainers 
+# Project Maintainers 
 <table>
   <tr>
     <td align="center"><a href="https://github.com/laceett"><img src="https://avatars3.githubusercontent.com/u/33075375?s=400&u=63aa9c0b047dcf26c82ecde36a0afdfd72e5e3ad&v=4" width="100px;" alt=""/><br /><sub><b>Lacee Xu</b></sub></a></td>
