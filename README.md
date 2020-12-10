@@ -2,9 +2,9 @@
 #### A smarter Datacenter!
 
 # Overview
-Our project modifies a kubernetes deployment to modify workloads to take into consideration energy budget. The goal is to build energy aware datacenters and ultimately reduce energy consumption to help build a greener planet. 
+Our project modifies a kubernetes deployment to modify workloads to take into consideration the energy budget. The goal is to build Energy Aware Datacenter and ultimately reduce energy consumption to help build a greener planet. 
 
-We use Kubernetes, a technology that is lighter weight than a virtual machine while also providing greater bin packing even as it shrinks an application to ensure successful deployments. We also use Golang, Terraform, and React in building a Kubernetes energy-aware datacenter in GCP.
+We use **Kubernetes**, a technology that is lighter weight than a virtual machine while also providing greater bin packing even as it shrinks an application to ensure successful deployments. We also use **Golang**, **Terraform**, and **React** in building a Kubernetes energy-aware datacenter in **GCP**.
 
 # Table of Contents
 - [Features](#features)
@@ -17,7 +17,7 @@ We use Kubernetes, a technology that is lighter weight than a virtual machine wh
 ![alt text](./images/architecture.png "Architecture")
 ###### Front-end
 + **Grafana** - UI that queries the data saved in Prometheus using PromQL and displays the change in CPU usage, number of pods running, dynamically with graphs and visualization.
-+ **Energy Signal Panel** - UI for admin to input an external energy signal,  check current status of the signal and view the number of pods running inside Kubernetes
++ **Energy Signal Panel** - UI for admin to input an external energy signal,  check the current status of the signal and view the number of pods running inside Kubernetes
 + **kubectl** - Command line tool that enables us to deploy and manage workloads in kubernetes.
 ###### Back-end
 + **Cloud Load Balancing** - Load Balancer that redirects external traffic to specific services running inside Kubernetes.
@@ -38,9 +38,9 @@ We use Kubernetes, a technology that is lighter weight than a virtual machine wh
 This document shows you how to re-build the whole project.
 
 ## Terraform:
-Our system runs on Kubernetes cluster, the first step is to deploy a cluster on Google Kubernetes Engine.
+Our system runs on a Kubernetes cluster, the first step is to deploy a cluster on Google Kubernetes Engine.
 
-Terraform is an open-source infrastructure as code software tool to provision data center infrastructure.
+Terraform is an open-source infrastructure as a code software tool to provision data center infrastructure.
 For installation, please refer to [install-guide](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 + `terraform/cluster/` directory contains the terraform code to provision a GKE cluster.
 + Create a service account under `IAM & Admin` for our GCP project if not already created.
@@ -52,7 +52,7 @@ For installation, please refer to [install-guide](https://learn.hashicorp.com/tu
 + `terraform apply`
 
 ## Authenticate Kubectl with GKE:
-Easiest way to authenticate is using `gcloud`. For `gcloud` installation, please refer to [install-guide](https://cloud.google.com/sdk/docs/install)
+The easiest way to authenticate is by using `gcloud`. For `gcloud` installation, please refer to [install-guide](https://cloud.google.com/sdk/docs/install)
 + Under GKE cluster, click on the connect button and copy-past `gcloud <command>` and run it in your local terminal.
 + `kubectl config current-context` to cross-reference to currently deployed GKE cluster.
 + `kubectl get pods -A` to display the pods as a sanity check.
@@ -92,7 +92,7 @@ In the energy-aware datacenter, Zeus is responsible for Policy, e.g. receiving e
 ### How to deploy it to GKE
 + configure your Docker with gcloud: `gcloud auth configure-docker`
 + Push the image to GCR(Google Cloud Registry): `docker push us.gcr.io/kube-flux/kube-flux-zeus:0.0.3`
-+ Deploy the container
++ Deploy the container:
 `kubectl apply -f low.yaml
  kubectl apply -f medium.yaml
  kubectl apply -f top.yaml`
